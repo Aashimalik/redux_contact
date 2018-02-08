@@ -1,0 +1,40 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+}
+.navbar-default {
+  background-color: rgb(241, 247, 247);
+  border-color: #fff;
+}
+.modal-dialog {
+  width: 400px;
+  margin: 30px auto;
+}
+.marginTop10{margin-top: 15%;}
+
+.loader,
+.loader:after {
+  border-radius: 50%;
+  width: 8em;
+  height: 8em;
+}
+.loader-small { font-size: 5px; overflow: hidden; text-align: center;}
+.loader-default { font-size: 10px; }
+.loader, .loader-small, .loader-default {
+  display: block;
+  overflow: hidden;
+  margin: 60px auto;
+  position: relative;
+  text-indent: -9999em;
+  border-top: 0.9em solid rgba(200, 200, 200, 0.5);
+  border-right: 0.9em solid rgba(200, 200, 200, 0.5);
+  border-bottom: 0.9em solid rgba(200, 200, 200, 0.5);
+  border-left: 0.9em solid #1974d2;
+  -webkit-transform: translateZ(0);
+  -ms-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-animation: load8 1.1s infinite linear;
+  animation: load8 1.1s infinite linear;
+}
+
