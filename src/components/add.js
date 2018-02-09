@@ -2,9 +2,10 @@ import React,{ Component } from 'react';
 import {Http} from '../lib/Http';
 import {connect} from 'react-redux';
 import { Form,Button } from 'react-bootstrap';
-import { Field, SubmissionError ,reduxForm } from 'redux-form';
+import { Field ,reduxForm} from 'redux-form';
 import {FormField} from '../common/FormField';
-import PlaceField from './address'
+import PlaceField from './address';
+import  { geocodeByAddress } from 'react-places-autocomplete'
 
 
 class CreateContact extends Component{
@@ -13,10 +14,46 @@ class CreateContact extends Component{
         this.formSubmit = this.formSubmit.bind(this);
         this.handleupdateclick = this.handleupdateclick.bind(this);
         this.addSelect=this.addSelect.bind(this);
+        this.checkadress=this.checkadress.bind(this);
+        
     }
 
+
+    checkadress(placee){
+        let place=placee["0"]
+        var componentForm = {
+            street_number: 'short_name',
+            route: 'long_name',
+            locality: 'long_name',
+            administrative_area_level_1: 'long_name',
+            country: 'long_name',
+            postal_code: 'short_name'
+          };
+    
+        for (var i = 0; i < place.address_components.length; i++) {
+            var addressType = place.address_components[i].types[0];
+            if (componentForm[addressType]) {
+                var val = place.address_components[i][componentForm[addressType]];
+                if(addressType==='locality'){
+                this.props.change("State",val)
+                }
+                else if(addressType==='administrative_area_level_1'){
+                    this.props.change("City",val)
+                }
+                else if(addressType==='country'){
+                    this.props.change("Country",val)
+                }
+            
+            }
+            }
+            
+    }
+    
+
     addSelect(value){
-        console.log("addselect",value)
+        geocodeByAddress(value)
+        .then(results => this.checkadress(results))
+        .catch(error => console.error(error))
     }
 
     handleupdateclick() {
@@ -36,7 +73,7 @@ class CreateContact extends Component{
         const {match}=this.props
         let oldPath=this.props.router.pathname;
         let id=match.params.id;
-         if(router.pathname=='/add' && oldPath==`/edit/${id}`){
+         if(router.pathname==='/add' && oldPath===`/edit/${id}`){
              this.props.initialize({})
          }
     }
@@ -51,8 +88,7 @@ class CreateContact extends Component{
 
     render() {
      
-        const { handleSubmit, submitting,dispatch,router} = this.props
-       
+        const {  handleSubmit, submitting} = this.props
         return (
             <div className="container">
                 <div className="col-md-5">
@@ -63,7 +99,7 @@ class CreateContact extends Component{
                 placeholder="Enter Name"
                 />
                 <Field 
-                component={FormField} type="number"
+                component={FormField} type="text"
                 name="phno" label="Phone Number"
                 placeholder="Enter Phone No" 
                 />
@@ -72,15 +108,24 @@ class CreateContact extends Component{
                 name="email" label="email"
                 placeholder="Enter email address" 
                 />       
-                {/* <Field 
-                component={FormField} type="text"
-                name="address" label="address"
-                placeholder="Enter  Address" 
-                />  */}
                 <Field 
                 name="address"
+                type="text"
                 component={PlaceField}
                 _onChange={this.addSelect}
+                />
+                <Field 
+                component={FormField} type="text"
+                name="State" label="State"
+                />
+                <Field 
+                readOnly="readOnly"
+                component={FormField} type="text"
+                name="City" label="City"
+                />
+                <Field 
+                component={FormField} type="text"
+                name="Country" label="Country"
                 />
                 <Button  bsStyle="primary" type="submit" disabled={submitting}>Submit</Button>
                 </Form>
@@ -116,7 +161,7 @@ class CreateContact extends Component{
 }
 
 const mapStateToProps = (state) => {
-    const { todos, form,router } = state
+    const { router } = state
     return {
         router:router.location
     }
@@ -143,3 +188,5 @@ const addForm = reduxForm({
 })(CreateContact)
 
 export default connect(mapStateToProps) (addForm)
+
+

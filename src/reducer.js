@@ -1,6 +1,6 @@
 import { combineReducers } from 'redux'
 import { reducer as formReducer } from 'redux-form';
-import {  routerReducer, routerMiddleware, push } from 'react-router-redux'
+import {  routerReducer } from 'react-router-redux'
 
 
 
