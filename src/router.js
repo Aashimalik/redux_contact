@@ -10,10 +10,12 @@ import xyz from './components/temp';
 import PrivateRoute from './components/PrivateRoute';
 import login from './components/login';
 import   Signup  from './components/Signup';
+import   MyProfile  from './components/myprofile';
 import Chat from "./components/Chat";
 import Forgot from "./components/forgotPassword";
 import React from 'react';
-import { ConnectedRouter } from 'react-router-redux'
+import { ConnectedRouter } from 'react-router-redux';
+
 
 
 export const Router = props => {
@@ -37,6 +39,7 @@ export const Router = props => {
                      <PrivateRoute exact path='/counter' component={Counter} />
                      <PrivateRoute exact path='/xyz' component={xyz} />
                      <PrivateRoute exact path='/chat' component={Chat} />
+                     <PrivateRoute exact path='/myprofile' component={MyProfile} />
                      <PrivateRoute  component={NotFound} />
                   </Switch>
                   </div>

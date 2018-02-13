@@ -3,119 +3,109 @@ import {Http} from '../lib/Http';
 import Signup from './Signup';
 import { Link } from 'react-router-dom';
 import AlertNotification from './aletmodal' ;
+import {FormField} from '../common/FormField';
+import { Form,Button } from 'react-bootstrap';
+import { Field ,reduxForm} from 'redux-form';
+import {createCookie} from '../lib/Cookie';
 
 class login extends Component{
     constructor(props){
         super(props);
         this.state={
-            username:'',
-            password:'',
             error:'',
             success:'',
             show:false,
             
         }
-        this.handleChange=this.handleChange.bind(this);
-        this.login=this.login.bind(this);
+      
+        this.formSubmit=this.formSubmit.bind(this);
         this.toggle=this.toggle.bind(this);
 
     }
-    handleChange(event){
-        this.setState({[event.target.name]:event.target.value});
-    }
-
+    
     toggle(){
         this.setState(function(prevState) {
             return {show: !prevState.show};
         })
     } 
-    login = () => {
-        const {history}=this.props;
-        const {username,password}=this.state;
-        Http.post(`adminapi/user/login`,{username,password})
-        .then((data) => {
-            const {errors}=data
-            if(errors){
-                this.setState({error:errors.message})
-            }
-            if(data.token !=null){
-                createCookie("token",data.token,1)
-                history.push('/show')
-            }
 
-         
-        })
-        .catch((err)=>{console.log(err)})
-        
-      }
     
 
     render(){
-        const {username,password,error,success}=this.state;
+        const {error,success}=this.state;
+        const { handleSubmit}=this.props;
   
         return(
             <div className="container">
             <div className="col-md-5">
-                <div className="form-area">  
+                
                 <AlertNotification alertVisible={error || success} alertMsg={error || success} className={error ? "danger" : "success"}/>
-                    <form >
+                    <Form onSubmit={handleSubmit(this.formSubmit)}>
                     <h3 >Login</h3>
-                        <div className="form-group">
-                            <input type="text" name="username" value={username} className="form-control" onChange={this.handleChange} id="name"  placeholder="Name" required />
-                        </div>
-                        <div className="form-group">
-                            <input type="password" name="password" value={password} className="form-control" onChange={this.handleChange} id="phno" placeholder="Password" required />
-                        </div>
-                        <div className="form-group">
-                                 
-                                        <div  >
-                                        No account? 
-                                            <a onClick={()=>{this.setState({show:true})}}>Create one</a><br/>
-                                            <Link to='/forgot'> Forgot Password</Link>
-                                           <Signup show ={this.state.show} hide={this.toggle}/>
-                                           
-                                        </div>
-                                        
-                                   
-                                </div>   
-                        
-                    <button type="button" onClick={this.login} id="submit" name="submit" className="btn btn-primary pull-right">Login</button>
-                    </form>
+                    <Field 
+                     placeholder="Name"
+                     type="text"
+                     name="username"
+                     label="Name"
+                     component={FormField}
+                    />
+                    <Field 
+                    component={FormField}
+                    type="password"
+                    name="password"
+                    label="Password"
+                    placeholder="Password"
+                    />
+                     No account? 
+                    <a onClick={()=>{this.setState({show:true})}}>Create one</a><br/>
+                    <Link to='/forgot'> Forgot Password</Link><br/>
+                    <Button type="submit">Login</Button>
+                    </Form>
+                    <Signup show ={this.state.show} hide={this.toggle} />
                 </div>
             </div>
 
-        </div> 
-        
         )
     }
+
+
+    formSubmit(values) {
+        console.log('inside form submit')
+        const { history } = this.props;
+        const { username, password } = values;
+        Http.post(`adminapi/user/login`, { username, password })
+            .then((data) => {
+                const { errors } = data
+                if (errors) {
+                    this.setState({ error: errors.message })
+                }
+                if (data.token != null) {
+                    createCookie("token", data.token, 1)
+                    history.push('/show')
+                }
+            })
+            .catch((err) => { console.log(err) })
+    }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-var createCookie = function(name, value, days) {
-    var expires;
-    if (days) {
-        var date = new Date();
-        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-        expires = "; expires=" + date.toGMTString();
+const loginForm = reduxForm({
+    form: 'login',
+    validate: (values) => {
+        const errors = {}
+        if (!values.username) {
+            errors.username = "Name is required"
+        }
+        if (!values.password) {
+            errors.password = "Password is required"
+        }
+        return errors
     }
-    else {
-        expires = "";
-    }
-    document.cookie = name + "=" + value + expires + "; path=/";
-}
+})(login)
 
 
 
-export default login;
+
+
+
+
+export default (loginForm);

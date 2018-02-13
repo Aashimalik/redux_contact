@@ -31,6 +31,9 @@ class DashboardNav extends Component{
                         <LinkContainer to="/logout">
 		            	<NavItem eventKey={3}> <Button onClick={()=>delete_cookie('token')} bsSize="small" bsStyle="primary">Logout</Button></NavItem>
 		   	            </LinkContainer>
+                           <LinkContainer to="/myprofile">
+		            	<NavItem eventKey={4}>Myprofile</NavItem>
+		   	            </LinkContainer>
                           
                         </Nav>
                 :   <Nav>

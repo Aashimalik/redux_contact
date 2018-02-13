@@ -7,7 +7,7 @@ class ShowPopup extends Component{
     	return(
 
     		
-    		<Modal show={this.props.show}  bsSize="small" aria-labelledby="contained-modal-title-sm">
+    		<Modal show={this.props.show} onHide={this.props.onHide} bsSize="small" aria-labelledby="contained-modal-title-sm">
                      <Modal.Header closeButton>
                        <Modal.Title id="contained-modal-title-sm">Delete Contact</Modal.Title>
                      </Modal.Header>

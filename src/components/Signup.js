@@ -1,123 +1,135 @@
 import React, { Component } from 'react';
-import {Modal,Button} from 'react-bootstrap';
+import {Modal,Button ,Form} from 'react-bootstrap';
 import {Http} from '../lib/Http';
+import {connect} from 'react-redux';
+import { Field ,reduxForm} from 'redux-form';
+import {FormField} from '../common/FormField';
+import {FormSubmit} from '../common/FormSubmit';
 import AlertNotification from './aletmodal' ;
 
 class Signup extends Component{
     constructor(props) {
       super(props);
-      this.handlemodal=this.handlemodal.bind(this);
-      this.handleChange = this.handleChange.bind(this);
-      this.resetForm = this.resetForm.bind(this);
-      this.Signup = this.Signup.bind(this);
+      this.handleExited= this.handleExited.bind(this);
+      this.sign_Up = this.sign_Up.bind(this);
       this.state = {
-        username: '',
-        password: '',
-        error: '',
-        success: '',
-        signupLink:'',
-        email:'',
-        confirm_pass:""
+       
+        signupLink:''
       };
     }
 
-    handleChange(event){
-    
-      this.setState({[event.target.name]:event.target.value});
+    handleExited() {
+      console.log("this.props",this.props)
+      const {dispatch, reset} = this.props;
+      dispatch(reset('signupForm'))
     }
-
-    
-
-    resetForm(){
-      this.setState({username:"",password:"",email:" ",confirm_pass:'',error:''});
-    }
-
-    handlemodal(){
-     this.setState({username:"",password:"",success:'',error:'',email:"",confirm_pass:''})
-    }
-
-    Signup(){
-    //  let password=document.getElementById("password").value;
-    //   let confirm_pass=document.getElementById("confirm_pass").value;
-      // if(password !==confirm_pass){
-      //   document.getElementById("password").style.borderColor = "#E34234";
-      //   document.getElementById("confirm_pass").style.borderColor = "#E34234";
-      // }else{
-       
-        const { username, password ,email} = this.state;
-        Http.post(`adminapi/user/sign`, { username, password,email})
-        .then((data) => {
-          
-          if (data.error) {
-            console.log(data)
-            this.setState({ error: data.error, success: '' })
-          } else {
-            this.setState({ success: data.Success, error:'',signupLink:data.signupLink });
-            this.resetForm();         
-          }
-        })
-    
-      
-        
-    }
-
-   
-  
 
     render(){
-      const { username, password, error, success,email,confirm_pass } = this.state
-      const { show, hide } = this.props;
-      const isEnabled = username.length > 0 && password.length > 0;
-      
+     
+      const { show, hide,handleSubmit,errors,invalid,submitting} = this.props;
         return(
-          <div className="modal-container" style={{ height: 200, width: 10 }}>
+          <div className="modal-container" style={{ height: 50, width: 10 }}>
             <Modal
               show={show}
               onHide={hide}
-              onExiting={this.handlemodal}
+              onExited={() => this.handleExited()}
               aria-labelledby="contained-modal-title" >
               <Modal.Header closeButton>
                 <Modal.Title id="contained-modal-title">
-                  <AlertNotification alertVisible={error || success} alertMsg={error || success} className={error ? "danger" : "success"} />
+             
                   Signup
                 </Modal.Title>
               </Modal.Header>
+              <Form onSubmit={handleSubmit(this.sign_Up)} >
               <Modal.Body>
-            
-                <div className="form-area">
-                  <form >
-                    <div className="form-group">
-                      <input type="text" name="username" value={username} className="form-control" onChange={this.handleChange} id="name" placeholder="Name" required />
-                    </div>
-                    <div className="form-group">
-                      <input type="text" name="email" value={email} className="form-control" onChange={this.handleChange} id="email" placeholder="Email" required />
-                    </div>
-                    <div className="form-group">
-                      <input type="password" name="password" value={password} className="form-control" onChange={this.handleChange} id="password" placeholder="Password" required />
-                    </div>
-                    <div className="form-group">
-                      <input type="password" name="confirm_pass" value={confirm_pass} className="form-control" onChange={this.handleChange} id="confirm_pass" placeholder="Confirm Password" required />
-                      <span>{}</span>
-                    </div>
-                  </form>
-                </div>
-               
-
+                  <Field
+                    placeholder="Name"
+                    label="Name"
+                    type="text"
+                    name="username"
+                    component={FormField}
+                  />
+                  <Field
+                    placeholder="Enter Email"
+                    label="Email"
+                    type="email"
+                    name="email"
+                    component={FormField}
+                  />
+                  <Field
+                    placeholder="Password"
+                    label="Password"
+                    type="password"
+                    name="password"
+                    component={FormField}
+                  />
+                  <Field
+                    placeholder="Confirm Password"
+                    label="Confirm Password"
+                    type="password"
+                    name="confirm_pass"
+                    component={FormField}
+                  />
               </Modal.Body>
               <Modal.Footer>
                 <Button onClick={this.props.hide}>Close</Button>
-                <Button bsStyle="info" disabled={!isEnabled} onClick={this.Signup} >Signup</Button>
+                <FormSubmit errors={errors} invalid={invalid} submitting={submitting} />
               </Modal.Footer>
+              </Form>
             </Modal>
           </div>
         );
         
     }
+    
+    sign_Up(values) {
+    console.log("inside from submit",values)
+    const { username, password, email } = values;
+    const { hide } = this.props;
+    Http.post(`adminapi/user/signup`, { username, password, email })
+      .then((data) => {
+          setTimeout(() => {
+            this.handleExited();
+          }, 3000);
+    
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+  }
 
 }
 
+const mapStateToProps = (state) => {
+  const { router } = state
+  return {
+      router:router.location
+  }
+}
+
+const signForm = reduxForm({
+  form: 'signupForm',
+  validate: (values) => {
+    console.log(values)
+      const errors = {}
+      if (!values.username) {
+          errors.username = "Name is required"
+      }
+      if (!values.email) {
+          errors.email = "Email is required"
+      }
+      if (!values.password) {
+        errors.password = "Password is required"
+      }else if( values.confirm_pass && values.password !== values.confirm_pass ) {
+    		errors.password = 'Password and Confirm password should match';
+    	}
+      if (!values.confirm_pass) {
+        errors.confirm_pass = "Password is required"
+    }
+      return errors
+  }
+  
+})(Signup)
 
 
-
-
-export default Signup;
+export default connect(mapStateToProps) (signForm);
